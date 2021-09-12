@@ -18,7 +18,9 @@ import (
 )
 
 var (
-	JsonParseErr = "invalid json"
+	JsonParseErr       = "invalid json"
+	JsonInvalid        = "Invalid json"
+	AuthenticateFailed = "AuthenticateFailed"
 )
 
 type post struct {
@@ -93,26 +95,26 @@ func checkJson(w http.ResponseWriter, r *http.Request) (int, error) {
 var login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	if statusCode, err := checkJson(w, r); err != nil {
 		w.WriteHeader(statusCode)
-		fmt.Fprintf(w, "Invalid json")
+		fmt.Fprintf(w, JsonInvalid)
 		return
 	}
 
 	var u User
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "Please provide valid login details111")
+		fmt.Fprintf(w, "AuthenticateFailed")
 		return
 	}
 
 	if user.UserName != u.UserName || user.Password != u.Password {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "Please provide valid login details")
+		fmt.Fprintf(w, "AuthenticateFailed")
 		return
 	}
 	token, err := auth.CreateToken(user.ID, user.UserName)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "invalid login parameter")
+		fmt.Fprintf(w, "AuthenticateFailed")
 		return
 	}
 	json.NewEncoder(w).Encode(token)
