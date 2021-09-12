@@ -19,6 +19,7 @@ type post struct {
 
 func main() {
 	r := mux.NewRouter()
+	r.Handle("/", public)
 	r.Handle("/public", public)
 	r.Handle("/private", auth.JwtMiddleware.Handler(private))
 	r.Handle("/auth", auth.GetTokenHandler)
