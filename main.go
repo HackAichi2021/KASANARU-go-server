@@ -102,19 +102,19 @@ var login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var u User
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "AuthenticateFailed")
+		fmt.Fprintf(w, AuthenticateFailed)
 		return
 	}
 
 	if user.UserName != u.UserName || user.Password != u.Password {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "AuthenticateFailed")
+		fmt.Fprintf(w, AuthenticateFailed)
 		return
 	}
 	token, err := auth.CreateToken(user.ID, user.UserName)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprintf(w, "AuthenticateFailed")
+		fmt.Fprintf(w, AuthenticateFailed)
 		return
 	}
 	json.NewEncoder(w).Encode(token)
