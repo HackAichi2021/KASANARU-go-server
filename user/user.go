@@ -16,7 +16,7 @@ func main() {
 	}
 
 	fmt.Println("HOST", os.Getenv("HOST"))
-	fmt.Println("USER", os.Getenv("USER"))
+	fmt.Println("USER", os.Getenv("DB_USER"))
 	fmt.Println("PASSWORD", os.Getenv("PASSWORD"))
 	fmt.Println("DB_NAME", os.Getenv("DB_NAME"))
 	fmt.Println("PORT", os.Getenv("PORT"))
@@ -24,7 +24,7 @@ func main() {
 	fmt.Println("TIME_ZONE", os.Getenv("TIME_ZONE"))
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		os.Getenv("HOST"), os.Getenv("USER"), os.Getenv("PASSWORD"),
+		os.Getenv("HOST"), os.Getenv("DB_USER"), os.Getenv("PASSWORD"),
 		os.Getenv("DB_NAME"), os.Getenv("PORT"), os.Getenv("SSLMODE"), os.Getenv("TIME_ZONE"))
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
