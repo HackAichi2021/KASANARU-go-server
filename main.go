@@ -46,8 +46,6 @@ var user = User{
 func main() {
 
 	database.GormConnect()
-	os.Setenv("PORT", "8080")
-
 	r := mux.NewRouter()
 	r.Handle("/", public)
 	r.Handle("/public", public)
