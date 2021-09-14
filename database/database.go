@@ -3,12 +3,10 @@ package database
 import (
 	"fmt"
 	"hackaichi2021/crypto"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -26,10 +24,6 @@ type User struct {
 }
 
 func GormConnect() *gorm.DB {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: strings.Join([]string{
@@ -71,4 +65,18 @@ func CreateUser(u User) int {
 	}
 
 	return http.StatusCreated
+}
+
+func GetIdByEmail(email string) []User {
+	db_conn := GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+
+	item := []User{}
+	db_conn.Find(&item, "email=?", email)
+	fmt.Println("item", item)
+	return item
 }

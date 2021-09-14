@@ -5,3 +5,5 @@ DB_NAME=d2b6g78k37huld
 PORT=5432
 SSLMODE=require
 TIME_ZONE=Asia/Tokyo
+
+export POSTGRESQL_URL='postgres://nmdgsrgfaozqmx:ca19c81102c5d5c3652e00f50e9d08530b2887307a2d69113121f3c76f55bf1d@ec2-54-159-175-113.compute-1.amazonaws.com:5432/d2b6g78k37huld?sslmode=require'

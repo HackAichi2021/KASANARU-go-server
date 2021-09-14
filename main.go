@@ -17,7 +17,6 @@ import (
 	api_user "hackaichi2021/user"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -45,20 +44,15 @@ var user = User{
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-	}
 
 	database.GormConnect()
-	os.Setenv("PORT", "8080")
-
 	r := mux.NewRouter()
 	r.Handle("/", public)
 	r.Handle("/public", public)
 	r.Handle("/private", auth.JwtMiddleware.Handler(private))
 	r.Handle("/auth", auth.GetTokenHandler)
 	r.Handle("/login", login)
-	r.Handle("/register", api_user.Register)
+	r.Handle("/api/user/register", api_user.Register).Methods("POST")
 
 	//サーバー起動
 	if err := http.ListenAndServe(":"+os.Getenv("PORT"), r); err != nil {
@@ -122,7 +116,7 @@ var login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, AuthenticateFailed)
 		return
 	}
-	token, err := auth.CreateToken(user.ID, user.UserName)
+	token, err := auth.CreateToken(user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, AuthenticateFailed)
