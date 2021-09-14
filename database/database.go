@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hackaichi2021/crypto"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -55,21 +56,19 @@ func GormConnect() *gorm.DB {
 	return db
 }
 
-func CreateUser(u User) error {
+func CreateUser(u User) int {
 	u.Password, _ = crypto.PasswordEncrypt(u.Password)
 
 	db_conn := GormConnect()
 	db, err := db_conn.DB()
 	if err != nil {
-		return err
+		return http.StatusInternalServerError
 	}
 	defer db.Close()
 
-	db_conn.Create(&u)
-
-	if err != nil {
-		return err
+	if result := db_conn.Create(&u); result.Error != nil {
+		return http.StatusBadRequest
 	}
 
-	return nil
+	return http.StatusCreated
 }
