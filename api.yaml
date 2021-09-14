@@ -85,7 +85,7 @@ components:
           example: Yamada
         age:
           type: string
-          exmaple: 50
+          example: 50
     userInfowithUUID:
       description: "認証系のトークン"
       type: object
