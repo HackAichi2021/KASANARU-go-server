@@ -41,7 +41,7 @@ paths:
                   type: string
                   description: ユーザー名
                   example: s-shiraki
-                content:
+                password:
                   type: string
                   description: password
                   example: plainPassword
