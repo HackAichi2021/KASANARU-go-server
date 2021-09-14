@@ -72,3 +72,17 @@ func CreateUser(u User) int {
 
 	return http.StatusCreated
 }
+
+func GetIdByEmail(email string) []User {
+	db_conn := GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+
+	item := []User{}
+	db_conn.Find(&item, "email=?", email)
+	fmt.Println("item", item)
+	return item
+}

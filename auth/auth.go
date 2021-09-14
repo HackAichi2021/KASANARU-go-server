@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"hackaichi2021/database"
 	"net/http"
 	"os"
 	"time"
@@ -46,7 +47,7 @@ var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	SigningMethod: jwt.SigningMethodHS256,
 })
 
-func CreateToken(id string, userName string) (*TokenDetails, error) {
+func CreateToken(email string) (*TokenDetails, error) {
 	td := &TokenDetails{}
 	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
 	td.AccessUuid = uuid.NewV4().String()
@@ -54,7 +55,13 @@ func CreateToken(id string, userName string) (*TokenDetails, error) {
 	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
 	td.RefreshUuid = uuid.NewV4().String()
 
+	user := database.GetIdByEmail(email)
 	var err error
+	if len(user) == 0 {
+		return nil, err
+	}
+	id := user[0].Id
+
 	//Creating Access Token
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
@@ -68,13 +75,13 @@ func CreateToken(id string, userName string) (*TokenDetails, error) {
 	}
 
 	//Creating Refresh Token
-	os.Setenv("REFRESH_SECRET", "mcmvmkmsdnfsdmfdsjf") //this should be in an env file
+	// os.Setenv("REFRESH_SECRET", "mcmvmkmsdnfsdmfdsjf") //this should be in an env file
 	rtClaims := jwt.MapClaims{}
 	rtClaims["refresh_uuid"] = td.RefreshUuid
 	rtClaims["user_id"] = id
 	rtClaims["exp"] = td.RtExpires
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
-	td.RefreshToken, err = rt.SignedString([]byte(os.Getenv("REFRESH_SECRET")))
+	td.RefreshToken, err = rt.SignedString([]byte(os.Getenv("SIGNINGKEY")))
 	if err != nil {
 		return nil, err
 	}

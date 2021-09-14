@@ -122,7 +122,7 @@ var login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, AuthenticateFailed)
 		return
 	}
-	token, err := auth.CreateToken(user.ID, user.UserName)
+	token, err := auth.CreateToken(user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, AuthenticateFailed)
