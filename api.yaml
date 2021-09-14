@@ -2,19 +2,16 @@ openapi: 3.0.0
 
 # info
 info:
-  title: KASNARU
+  title: KASANARU
   description: KASANARU-Service API
   contact:
     name: Developer
     url: https://github.com/HighPon
     email: s.shiraki081@gmail.com
-  version: 1.0.0
+  version: 1.0.1
 
 # server
 servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/HighPon/HackAichi2021/1.0.0
   - url: https://hackaichi2021.herokuapp.com/
     description: herokuで稼働
 
@@ -34,15 +31,30 @@ paths:
       parameters: []
       requestBody:
         description: ユーザ情報
+        required: true
         content:
           application/json:
             schema:
-              $ref: 'https://hackaichi2021.herokuapp.com/'
-            example:
-              email: example@example.com
-              username: testUser
-              password: passwordphrase
-              age: age
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: ユーザー名
+                  example: s-shiraki
+                content:
+                  type: string
+                  description: password
+                  example: plainPassword
+                email:
+                  type: string
+                  description: Email
+                  example: test@gmail.com
+                age:
+                  type: integer
+                  format: int64
+                  description: ユーザーの年齢
+                  example: 30
+
       responses:
         '201':
           description: Created
