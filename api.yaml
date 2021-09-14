@@ -1,0 +1,101 @@
+openapi: 3.0.0
+
+# info
+info:
+  title: KASNARU
+  description: KASANARU-Service API
+  contact:
+    name: Developer
+    url: https://github.com/HighPon
+    email: s.shiraki081@gmail.com
+  version: 1.0.0
+
+# server
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/HighPon/HackAichi2021/1.0.0
+  - url: https://hackaichi2021.herokuapp.com/
+    description: herokuで稼働
+
+# tag
+tags:
+- name: "user"
+  description: "ユーザ関連"
+
+paths:
+  /api/user/register:
+    post:
+      tags:
+        - user
+      summary: ユーザを登録
+      description: ユーザ情報をデータベースに登録します
+      operationId: create
+      parameters: []
+      requestBody:
+        description: ユーザ情報
+        content:
+          application/json:
+            schema:
+              $ref: 'https://hackaichi2021.herokuapp.com/'
+            example:
+              email: example@example.com
+              username: testUser
+              password: passwordphrase
+              age: age
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              example:
+                status: Success
+                message: User registered successfully
+                AccessToken: xxxxxx
+                RefreshToken: xxxx
+                
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                status: Error
+                message: Your account is already registered
+
+# component
+components:
+  schemas:
+    userInfo: 
+      description: "ユーザ情報"
+      type: object
+      required: 
+        - email
+        - password
+        - username
+        - age
+      properties:
+        email:
+          type: string
+          example: example@gmail.com
+        password:
+          type: string
+          example: password phrase
+        username:
+          type: string
+          example: Yamada
+        age:
+          type: string
+          exmaple: 50
+    userInfowithUUID:
+      description: "認証系のトークン"
+      type: object
+      required:
+        - AccessToken
+        - RefreshToken
+      properties:
+        AccessToken:
+          type: string
+          example: xxxxxx
+        RefreshToken:
+          type: string
+          example: xxxx
