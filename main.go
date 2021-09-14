@@ -17,7 +17,6 @@ import (
 	api_user "hackaichi2021/user"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -45,9 +44,6 @@ var user = User{
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-	}
 
 	database.GormConnect()
 	os.Setenv("PORT", "8080")
