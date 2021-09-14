@@ -58,7 +58,7 @@ func main() {
 	r.Handle("/private", auth.JwtMiddleware.Handler(private))
 	r.Handle("/auth", auth.GetTokenHandler)
 	r.Handle("/login", login)
-	r.Handle("/register", api_user.Register)
+	r.Handle("/api/user/register", api_user.Register).Methods("POST")
 
 	//サーバー起動
 	if err := http.ListenAndServe(":"+os.Getenv("PORT"), r); err != nil {
