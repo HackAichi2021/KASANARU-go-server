@@ -1,12 +1,13 @@
 BEGIN;
-CREATE TABLE IF NOT EXISTS users(
-   user_id serial PRIMARY KEY,
-   username VARCHAR (255) NOT NULL,
-   password VARCHAR (255) NOT NULL,
+create table if not exists users (
+   id BIGSERIAL PRIMARY KEY,
+   user_name VARCHAR (255) NOT NULL,
+   password VARCHAR(255) NOT NULL,
    email VARCHAR (255) UNIQUE NOT NULL,
-   age INTEGER,
-   created_at TIMESTAMP NOT NULL DEFAULT  CURRENT_TIMESTAMP,
-   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   deleted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+   age INTEGER NOT NULL,
+   categories INTEGER[],
+   updated_at BIGINT DEFAULT 0 NOT NULL,
+   created_at BIGINT DEFAULT 0 NOT NULL,
+   deleted_at BIGINT DEFAULT 0 NOT NULL
 );
 COMMIT;
