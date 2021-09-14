@@ -26,8 +26,10 @@ require (
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.2 // indirect
+	github.com/justinas/alice v1.2.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/myesui/uuid v1.0.0 // indirect
+	github.com/rs/cors v1.8.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
 	gorm.io/driver/sqlite v1.1.5 // indirect

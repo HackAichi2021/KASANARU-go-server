@@ -17,6 +17,8 @@ import (
 	api_user "hackaichi2021/user"
 
 	"github.com/gorilla/mux"
+	"github.com/justinas/alice"
+	"github.com/rs/cors"
 )
 
 var (
@@ -53,11 +55,20 @@ func main() {
 	r.Handle("/auth", auth.GetTokenHandler)
 	r.Handle("/login", login)
 	r.Handle("/api/user/register", api_user.Register).Methods("POST")
+	c := cors.Default()
+	chain := alice.New(c.Handler, logHandler).Then(r)
 
 	//サーバー起動
-	if err := http.ListenAndServe(":"+os.Getenv("PORT"), r); err != nil {
+	if err := http.ListenAndServe(":"+os.Getenv("PORT"), chain); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
+}
+
+func logHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Method: %v; URL: %v; Protocol: %v", r.Method, r.URL, r.Proto)
+		h.ServeHTTP(w, r)
+	})
 }
 
 var public = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
