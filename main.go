@@ -56,8 +56,16 @@ func main() {
 	r.Handle("/login", login)
 	r.Handle("/api/user/register", api_user.Register).Methods("POST")
 	r.Handle("/api/user/login", api_user.Login).Methods("POST")
+	r.Handle("/api/user/update", api_user.Update).Methods("POST")
 
-	c := cors.Default()
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Content-Type", "application/json"},
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
+	})
 	chain := alice.New(c.Handler, logHandler).Then(r)
 
 	//サーバー起動
