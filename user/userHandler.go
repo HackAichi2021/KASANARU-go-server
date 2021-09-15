@@ -173,6 +173,16 @@ var Update = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := database.InsertOrUpdateFavorite(favorite); err != nil {
 			fmt.Println(err)
 		}
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		response := Response{
+			Status:  "Error",
+			Message: "Update failed",
+		}
+		json, _ := json.Marshal(response)
+
+		w.Write(json)
+		return
 	}
 	fmt.Println("uudisaj")
 
