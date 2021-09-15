@@ -135,10 +135,10 @@ components:
       description: "認証系のトークン"
       type: object
       properties:
-        AccessToken:
+        access_token:
           type: string
           example: xxxxxx
-        RefreshToken:
+        refresh_token:
           type: string
           example: xxxx
     
