@@ -24,14 +24,22 @@ type User struct {
 }
 
 type Favorite struct {
-	UserId int `json:"id" gorm:"unique;not null"`
-	Age    int `json:"username" binding:"required"`
-	Sex    int `json:"sex" binding:"required"`
-	Animal int `json:"animal" binding:"required"`
-	Music  int `json:"music" binding:"required"`
-	Sport  int `json:"sport" binding:"required"`
-	Movie  int `json:"movie" binding:"required"`
-	Book   int `json:"book" binding:"required"`
+	UserId   int `json:"id" gorm:"unique;not null"`
+	Age      int `json:"username" binding:"required"`
+	Sex      int `json:"sex" binding:"required"`
+	Game     int `json:"game" binding:"required"`
+	Sport    int `json:"sport" binding:"required"`
+	Book     int `json:"book" binding:"required"`
+	Travel   int `json:"travel" binding:"required"`
+	Internet int `json:"internet" binding:"required"`
+	Anime    int `json:"anime" binding:"required"`
+	Movie    int `json:"movie" binding:"required"`
+	Music    int `json:"music" binding:"required"`
+	Gourmet  int `json:"gourmet" binding:"required"`
+	Muscle   int `json:"muscle" binding:"required"`
+	Camp     int `json:"camp" binding:"required"`
+	Tv       int `json:"tv" binding:"required"`
+	Cook     int `json:"cook" binding:"required"`
 }
 
 func GormConnect() *gorm.DB {

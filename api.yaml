@@ -107,7 +107,7 @@ paths:
       tags:
         - update
       summary: ユーザの属性関連
-      description: ユーザの属性関連を追加
+      description: ユーザの属性関連を追加、トークン以外は0、1しかはいらない
       operationId: create
       parameters: []
       requestBody:
@@ -241,18 +241,43 @@ components:
         sex:
           type: integer
           example: 0
-        animal:
-          type: integer
-          example: 0
-        music:
+        game:
           type: integer
           example: 0
         sport:
+          type: integer
+          example: 0
+        book:
+          type: integer
+          example: 0      
+        travel:
+          type: integer
+          example: 0      
+        internet:
+          type: integer
+          example: 0
+        anime:
           type: integer
           example: 0      
         movie:
           type: integer
           example: 0      
-        book:
+        music:
           type: integer
-          example: 0      
+          example: 0  
+        gourmet:
+          type: integer
+          example: 0  
+        mucle:
+          type: integer
+          example: 0  
+        camp:
+          type: integer
+          example: 0  
+        tv:
+          type: integer
+          example: 0  
+        cook:
+          type: integer
+          example: 0  
+          
