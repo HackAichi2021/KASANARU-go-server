@@ -62,7 +62,7 @@ func main() {
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
 		AllowCredentials: true,
-		AllowedHeaders:   []string{"Content-Type"},
+		AllowedHeaders:   []string{"Content-Type", "application/json"},
 		// Enable Debugging for testing, consider disabling in production
 		Debug: true,
 	})
