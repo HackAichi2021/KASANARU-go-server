@@ -17,10 +17,21 @@ type User struct {
 	UserName  string `json:"username" binding:"required" gorm:"type:varchar(255);not null"`
 	Email     string `json:"email" binding:"required" gorm:"type:varchar(255);not null"`
 	Password  string `json:"password" binding:"required" gorm:"type:varchar(1024);not null"`
-	Age       int64  `json:"age" binding:"required" gorm:"not null"`
+	Age       int    `json:"age" binding:"required" gorm:"not null"`
 	UpdatedAt int64  `json:"updatedAt" gorm:"autoUpdateTime"`
 	CreatedAt int64  `json:"createdAt" gorm:"autoCreateTime"`
 	DeletedAt int64  `json:"deletedAt"`
+}
+
+type Favorite struct {
+	UserId int `json:"id" gorm:"unique;not null"`
+	Age    int `json:"username" binding:"required"`
+	Sex    int `json:"sex" binding:"required"`
+	Animal int `json:"animal" binding:"required"`
+	Music  int `json:"music" binding:"required"`
+	Sport  int `json:"sport" binding:"required"`
+	Movie  int `json:"movie" binding:"required"`
+	Book   int `json:"book" binding:"required"`
 }
 
 func GormConnect() *gorm.DB {
@@ -94,4 +105,29 @@ func GetOneColumnValueUser(column string, email string) []User {
 	fmt.Println("item", item)
 	return item
 
+}
+
+func InsertOrUpdateFavorite(item Favorite) error {
+	db_conn := GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+
+	var u []Favorite
+	db_conn.Find(&u, "user_id=?", item.UserId)
+	fmt.Println("u", u)
+	if len(u) == 0 {
+		if result := db_conn.Create(&item); result.Error != nil {
+			return result.Error
+		}
+	} else {
+		// db_conn.Save(item)
+		result := db_conn.Model(&Favorite{}).Where("user_id=?", u[0].UserId).Updates(&item)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+	return nil
 }
