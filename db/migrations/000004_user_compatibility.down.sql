@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS user_compatibility;
+DROP TABLE IF EXISTS users_compatibility;
