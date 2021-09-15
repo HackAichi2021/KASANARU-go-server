@@ -20,6 +20,12 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
+type Session struct {
+	AccessUuid  string `json:"accessUuid" gorm:"type:varchar(255);not null"`
+	RefreshUuid string `json:"refreshUuid" gorm:"type:varchar(255);not null"`
+	UserId      int    `json:"age" gorm:"not null"`
+}
+
 // GetTokenHandler get token
 var GetTokenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -82,8 +88,38 @@ func CreateTokenByUserIdWithEmail(email string) (*TokenDetails, error) {
 	rtClaims["exp"] = td.RtExpires
 	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
 	td.RefreshToken, err = rt.SignedString([]byte(os.Getenv("SIGNINGKEY")))
+
 	if err != nil {
 		return nil, err
 	}
+
+	if err := InsertTokenWithUserId(td, id); err != nil {
+		return nil, err
+	}
+
 	return td, nil
+}
+
+func InsertTokenWithUserId(token *TokenDetails, id int) error {
+	db_conn := database.GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	item := Session{
+		AccessUuid:  token.AccessUuid,
+		RefreshUuid: token.RefreshToken,
+		UserId:      id,
+	}
+	result := db_conn.Create(&item)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func IntToInt64(i int) int64 {
+	return int64(i)
 }

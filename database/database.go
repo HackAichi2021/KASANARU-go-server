@@ -13,7 +13,7 @@ import (
 )
 
 type User struct {
-	Id        int64  `json:"exampleId" gorm:"primaryKey"`
+	Id        int    `json:"exampleId" gorm:"primaryKey"`
 	UserName  string `json:"username" binding:"required" gorm:"type:varchar(255);not null"`
 	Email     string `json:"email" binding:"required" gorm:"type:varchar(255);not null"`
 	Password  string `json:"password" binding:"required" gorm:"type:varchar(1024);not null"`
