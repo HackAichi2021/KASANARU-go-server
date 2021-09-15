@@ -82,17 +82,16 @@ var Login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	token, _ := auth.CreateTokenByUserIdWithEmail(form.Email)
 
-	responseAuthenticate(w, http.StatusNoContent, token)
+	w.WriteHeader(http.StatusOK)
+	response := AuthenticateResponse{
+		Status:       "Success",
+		Message:      "Login successfully",
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
+	}
+	json, _ := json.Marshal(response)
 
-	// response := AuthenticateResponse{
-	// 	Status:       "Success",
-	// 	Message:      "User registered successfully",
-	// 	AccessToken:  token.AccessToken,
-	// 	RefreshToken: token.RefreshToken,
-	// }
-	// json, _ := json.Marshal(response)
-
-	// w.Write(json)
+	w.Write(json)
 	// if err := responseAuthenticate(w, http.StatusNoContent, token); err != nil {
 	// 	fmt.Println("eeerr")
 	// }
