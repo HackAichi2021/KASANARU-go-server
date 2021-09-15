@@ -17,10 +17,50 @@ servers:
 
 # tag
 tags:
-- name: "user"
-  description: "ユーザ関連"
+  - name: "user"
+    description: "ユーザ関連"
+
+  - name: "login"
+    description: "ログイン関連"
 
 paths:
+  /api/user/login:
+    post:
+      tags:
+        - login
+      summary: ログイン
+      description: Emailとパスワードで認証します
+      operationId: postLogin
+      parameters: []
+      requestBody:
+        description: ユーザ情報
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/UserInfo'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Success'
+                - $ref: '#/components/schemas/LoginSuccess'
+                - $ref: '#/components/schemas/Token'
+                
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Failed'
+                - $ref: '#/components/schemas/LoginFailed'
+
   /api/user/register:
     post:
       tags:
@@ -35,75 +75,65 @@ paths:
         content:
           application/json:
             schema:
+              allOf:
+              - $ref: '#/components/schemas/UserInfo'
               type: object
-              properties:
-                username:
-                  type: string
-                  description: ユーザー名
-                  example: s-shiraki
-                password:
-                  type: string
-                  description: password
-                  example: plainPassword
-                email:
-                  type: string
-                  description: Email
-                  example: test@gmail.com
-                age:
-                  type: integer
-                  format: int64
-                  description: ユーザーの年齢
-                  example: 30
 
       responses:
         '201':
           description: Created
           content:
             application/json:
-              example:
-                status: Success
-                message: User registered successfully
-                AccessToken: xxxxxx
-                RefreshToken: xxxx
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Success'
+                - $ref: '#/components/schemas/RegisterSuccess'
+                - $ref: '#/components/schemas/Token'
                 
         '400':
           description: Bad Request
           content:
             application/json:
-              example:
-                status: Error
-                message: Your account is already registered
+                schema:
+                  allOf:
+                  - $ref: '#components/schemas/Failed'
+                  - $ref: '#components/schemas/RegisterFailed'     
 
 # component
 components:
   schemas:
-    userInfo: 
+    UserInfo: 
       description: "ユーザ情報"
       type: object
-      required: 
-        - email
-        - password
-        - username
-        - age
       properties:
         email:
           type: string
           example: example@gmail.com
         password:
           type: string
-          example: password phrase
+          example: plainPassword
         username:
           type: string
           example: Yamada
         age:
-          type: string
+          type: integer
+          format: int64
           example: 50
-    userInfowithUUID:
+
+    LoginInfo: 
+      description: "ユーザ情報"
+      type: object
+      properties:
+        email:
+          type: string
+          example: example@gmail.com
+        password:
+          type: string
+          example: plainPassword
+          
+    Token:
       description: "認証系のトークン"
       type: object
-      required:
-        - AccessToken
-        - RefreshToken
       properties:
         AccessToken:
           type: string
@@ -111,3 +141,51 @@ components:
         RefreshToken:
           type: string
           example: xxxx
+    
+    Failed:
+      description: "失敗時"
+      type: object
+      properties:
+        status:
+          type: string
+          example: Error
+
+    Success:
+      description: "成功時"
+      type: object
+      properties:
+        status:
+          type: string
+          example: Success
+
+    RegisterFailed:
+      description: "登録失敗"
+      type: object
+      properties:
+        message:
+          type: string
+          example: Your account is already registered
+
+    RegisterSuccess:
+      description: "登録成功"
+      type: object
+      properties:
+        message:
+          type: string
+          example: User registered successfully
+
+    LoginFailed:
+      description: "ログイン失敗"
+      type: object
+      properties:
+        message:
+          type: string
+          example: Unauthorized
+
+    LoginSuccess:
+      description: "ログイン成功"
+      type: object
+      properties:
+        message:
+          type: string
+          example: Login successfully
