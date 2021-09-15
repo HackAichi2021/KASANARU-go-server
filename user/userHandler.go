@@ -10,8 +10,13 @@ import (
 )
 
 type LoginForm struct {
-	Email    string `json:"email" binding: "required"`
-	Password string `json: "password" binding: "required`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type TokenForm struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type Response struct {
@@ -22,8 +27,8 @@ type Response struct {
 type AuthenticateResponse struct {
 	Status       string `json:"status"`
 	Message      string `json:"message"`
-	AccessToken  string `json: "access_token"`
-	RefreshToken string `json: "refresh_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 var Register = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -95,6 +100,14 @@ var Login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	// if err := responseAuthenticate(w, http.StatusNoContent, token); err != nil {
 	// 	fmt.Println("eeerr")
 	// }
+})
+
+var Update = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var form TokenForm
+	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("form", form)
 })
 
 func responseError(w http.ResponseWriter, statusCode int) error {
