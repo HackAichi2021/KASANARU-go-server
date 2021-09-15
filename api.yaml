@@ -23,6 +23,9 @@ tags:
   - name: "login"
     description: "ログイン関連"
 
+  - name: "update"
+    description: "ユーザーの属性更新関連"
+
 paths:
   /api/user/login:
     post:
@@ -97,7 +100,40 @@ paths:
                 schema:
                   allOf:
                   - $ref: '#components/schemas/Failed'
-                  - $ref: '#components/schemas/RegisterFailed'     
+                  - $ref: '#components/schemas/RegisterFailed'
+
+  /api/user/update:
+    post:
+      tags:
+        - update
+      summary: ユーザの属性関連
+      description: ユーザの属性関連を追加
+      operationId: create
+      parameters: []
+      requestBody:
+        description: ユーザ属性情報
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/Favorite'
+              - $ref: '#/components/schemas/Token'
+              type: object
+
+      responses:
+        '204':
+          description: Created
+
+                
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+                schema:
+                  allOf:
+                  - $ref: '#components/schemas/Failed'
+                  - $ref: '#components/schemas/UpdateFailed'     
 
 # component
 components:
@@ -189,3 +225,34 @@ components:
         message:
           type: string
           example: Login successfully
+
+    UpdateFailed:
+      description: "更新失敗"
+      type: object
+      properties:
+        message:
+          type: string
+          example: Update failed
+
+    Favorite:
+      description: "属性関連0か1しか入らない"
+      type: object
+      properties:
+        sex:
+          type: integer
+          example: 0
+        animal:
+          type: integer
+          example: 0
+        music:
+          type: integer
+          example: 0
+        sport:
+          type: integer
+          example: 0      
+        movie:
+          type: integer
+          example: 0      
+        book:
+          type: integer
+          example: 0      

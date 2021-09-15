@@ -7,6 +7,10 @@ import (
 	"hackaichi2021/crypto"
 	"hackaichi2021/database"
 	"net/http"
+	"reflect"
+	"strconv"
+
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 type LoginForm struct {
@@ -14,7 +18,13 @@ type LoginForm struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type TokenForm struct {
+type UpdateForm struct {
+	Sex          int    `json:"sex" binding:"required"`
+	Animal       int    `json:"animal" binding:"required"`
+	Music        int    `json:"music" binding:"required"`
+	Sport        int    `json:"sport" binding:"required"`
+	Movie        int    `json:"movie" binding:"required"`
+	Book         int    `json:"book" binding:"required"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
@@ -103,15 +113,62 @@ var Login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 })
 
 var Update = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	var form TokenForm
+	var form UpdateForm
 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
 		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		response := Response{
+			Status:  "Error",
+			Message: "Update failed",
+		}
+		json, _ := json.Marshal(response)
+
+		w.Write(json)
+		return
 	}
+
 	fmt.Println("form", form)
+	tokenString := form.AccessToken
+	claims := jwt.MapClaims{}
+	token, _ := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("SIGNINGKEY"), nil
+	})
+
+	fmt.Println(token)
+
+	c, ok := claims["user_id"].(float64)
+	var id int
+	if ok {
+		id = int(c)
+	}
+
+	user := database.GetOneColumnValueUser("id", strconv.Itoa(id))
+	if len(user) > 0 {
+		favorite := database.Favorite{
+			UserId: id,
+			Age:    user[0].Age,
+			Sex:    form.Sex,
+			Animal: form.Animal,
+			Music:  form.Music,
+			Sport:  form.Sport,
+			Movie:  form.Movie,
+			Book:   form.Book,
+		}
+		if err := database.InsertOrUpdateFavorite(favorite); err != nil {
+			fmt.Println(err)
+		}
+	}
+	fmt.Println("uudisaj")
+
+	w.WriteHeader(http.StatusNoContent)
+
 })
 
+func P(t interface{}) {
+	fmt.Println(reflect.TypeOf(t))
+}
+
 func responseError(w http.ResponseWriter, statusCode int) error {
-	w.WriteHeader(statusCode)
 	response := Response{
 		Status:  "Error",
 		Message: http.StatusText(statusCode),
@@ -122,6 +179,7 @@ func responseError(w http.ResponseWriter, statusCode int) error {
 		return err
 	}
 
+	w.WriteHeader(statusCode)
 	w.Write(json)
 	return nil
 }
