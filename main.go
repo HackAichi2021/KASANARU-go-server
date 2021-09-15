@@ -55,6 +55,8 @@ func main() {
 	r.Handle("/auth", auth.GetTokenHandler)
 	r.Handle("/login", login)
 	r.Handle("/api/user/register", api_user.Register).Methods("POST")
+	r.Handle("/api/user/login", api_user.Login).Methods("POST")
+
 	c := cors.Default()
 	chain := alice.New(c.Handler, logHandler).Then(r)
 
@@ -127,7 +129,7 @@ var login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, AuthenticateFailed)
 		return
 	}
-	token, err := auth.CreateToken(user.ID)
+	token, err := auth.CreateTokenByUserIdWithEmail(user.ID)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, AuthenticateFailed)

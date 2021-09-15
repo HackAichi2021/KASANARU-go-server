@@ -80,3 +80,18 @@ func GetIdByEmail(email string) []User {
 	fmt.Println("item", item)
 	return item
 }
+
+func GetOneColumnValueUser(column string, email string) []User {
+	db_conn := GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+
+	item := []User{}
+	db_conn.Find(&item, column+"=?", email)
+	fmt.Println("item", item)
+	return item
+
+}
