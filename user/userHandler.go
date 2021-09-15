@@ -20,11 +20,19 @@ type LoginForm struct {
 
 type UpdateForm struct {
 	Sex          int    `json:"sex" binding:"required"`
-	Animal       int    `json:"animal" binding:"required"`
-	Music        int    `json:"music" binding:"required"`
+	Game         int    `json:"game" binding:"required"`
 	Sport        int    `json:"sport" binding:"required"`
-	Movie        int    `json:"movie" binding:"required"`
 	Book         int    `json:"book" binding:"required"`
+	Travel       int    `json:"travel" binding:"required"`
+	Internet     int    `json:"internet" binding:"required"`
+	Anime        int    `json:"anime" binding:"required"`
+	Movie        int    `json:"movie" binding:"required"`
+	Music        int    `json:"music" binding:"required"`
+	Gourmet      int    `json:"gourmet" binding:"required"`
+	Muscle       int    `json:"muscle" binding:"required"`
+	Camp         int    `json:"camp" binding:"required"`
+	Tv           int    `json:"tv" binding:"required"`
+	Cook         int    `json:"cook" binding:"required"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
@@ -145,14 +153,22 @@ var Update = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	user := database.GetOneColumnValueUser("id", strconv.Itoa(id))
 	if len(user) > 0 {
 		favorite := database.Favorite{
-			UserId: id,
-			Age:    user[0].Age,
-			Sex:    form.Sex,
-			Animal: form.Animal,
-			Music:  form.Music,
-			Sport:  form.Sport,
-			Movie:  form.Movie,
-			Book:   form.Book,
+			UserId:   id,
+			Age:      user[0].Age,
+			Sex:      form.Sex,
+			Game:     form.Game,
+			Sport:    form.Sport,
+			Book:     form.Book,
+			Travel:   form.Travel,
+			Internet: form.Internet,
+			Anime:    form.Anime,
+			Movie:    form.Movie,
+			Music:    form.Music,
+			Gourmet:  form.Gourmet,
+			Muscle:   form.Muscle,
+			Camp:     form.Camp,
+			Tv:       form.Tv,
+			Cook:     form.Cook,
 		}
 		if err := database.InsertOrUpdateFavorite(favorite); err != nil {
 			fmt.Println(err)
