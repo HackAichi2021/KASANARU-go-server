@@ -107,7 +107,7 @@ paths:
       tags:
         - update
       summary: ユーザの属性関連
-      description: ユーザの属性関連を追加
+      description: ユーザの属性関連を追加、トークン以外は0、1しかはいらない
       operationId: create
       parameters: []
       requestBody:
