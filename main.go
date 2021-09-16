@@ -69,7 +69,7 @@ func logHandler(h http.Handler) http.Handler {
 
 var a = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	out, _ := exec.Command("curl", "google.com").Output()
-	fmt.Println(out)
+	fmt.Println(string(out))
 })
 
 type AIRequest struct {
