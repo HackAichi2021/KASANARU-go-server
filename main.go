@@ -41,7 +41,7 @@ func main() {
 	r.Handle("/api/user/update", api_user.Update).Methods("POST")
 	r.Handle("/api/user/matching", api_user.Match).Methods("POST")
 	r.Handle("/api/user/favorite/get", api_user.FavoriteGet).Methods("POST")
-	r.Handle("/curl", api_user.FavoriteGet).Methods("GET")
+	r.Handle("/curl", a).Methods("GET")
 	go monitor()
 
 	c := cors.New(cors.Options{
