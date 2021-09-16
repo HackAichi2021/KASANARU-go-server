@@ -42,8 +42,18 @@ type MatchingForm struct {
 	Longitude    float64 `json:"longitude" binding:"required"`
 	Lend         int     `json:"lend" binding:"required"`
 	AfterArrival int     `json:"after_arrival" binding:"required"`
-	AccessToken  string  `json:"access_token" binding:"required"`
-	RefreshToken string  `json:"refresh_token" binding:"required"`
+	Token
+}
+
+type Token struct {
+	AccessToken  string `json:"access_token" binding:"required"`
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+type Matching struct {
+	UserId   int `json:"user_id" binding:"required"`
+	Info     MatchingForm
+	Favorite UpdateForm
 }
 
 type Response struct {
@@ -58,7 +68,22 @@ type AuthenticateResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-var MatchLend []MatchingForm
+type FavoriteGetReseponse struct {
+	Favorite database.Favorite
+	Response Response
+	UserName string `json:"username"`
+	Age      int    `json:"age" binding:"required"`
+}
+
+//貸す人へのresponse 借りる人には緯度、経度は0で渡す
+type LendResponse struct {
+	UserName  string  `json:"user_name" binding:"required"`
+	Latitude  float64 `json:"latitude" binding:"required"`
+	Longitude float64 `json:"longitude" binding:"required"`
+}
+
+var MatchingSlice [2][]Matching
+var NotifiesLend = make(map[string](chan LendResponse))
 
 var Register = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var form database.User
@@ -201,26 +226,87 @@ var Update = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 })
 
-var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	var form MatchingForm
-	fmt.Println("hello")
+// var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 	var form MatchingForm
+// 	fmt.Println("hello")
+// 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+// 		fmt.Println(err)
+// 		w.WriteHeader(http.StatusBadRequest)
+// 		response := Response{
+// 			Status:  "Error",
+// 			Message: "Match failed",
+// 		}
+// 		json, _ := json.Marshal(response)
+
+// 		w.Write(json)
+// 		return
+// 	}
+
+// 	fmt.Println("form", form)
+// 	fmt.Println("match_lend", MatchingSlice)
+// 	item := Matching {
+// 		UserId: decodeUserIdFromAccessToken(form.AccessToken),
+// 		Info: form,
+// 		Favorite:
+// 	}
+// 	MatchingSlice[form.Lend] = append(MatchingSlice[form.Lend], form)
+// 	fmt.Println("match_lend", MatchingSlice)
+
+// 	NotifiesLend[form.AccessToken] = make(chan LendResponse)
+// 	fmt.Println("wait")
+// 	b := <-NotifiesLend[form.AccessToken]
+// 	fmt.Println("answer", b)
+
+// 	fmt.Println("id", decodeUserIdFromAccessToken(form.AccessToken))
+
+// })
+
+var FavoriteGet = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var form UpdateForm
 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		response := Response{
 			Status:  "Error",
-			Message: "Match failed",
+			Message: "Favorite Get failed",
 		}
 		json, _ := json.Marshal(response)
-
 		w.Write(json)
 		return
 	}
 
-	fmt.Println("form", form)
-	fmt.Println("match_lend", MatchLend)
-	MatchLend = append(MatchLend, form)
-	fmt.Println("match_lend", MatchLend)
+	favorite := database.GetFavorite(decodeUserIdFromAccessToken(form.AccessToken))
+	user := database.GetUserByUserId(decodeUserIdFromAccessToken(form.AccessToken))
+	fmt.Println(favorite)
+	if len(favorite) > 0 && len(user) > 0 {
+		w.WriteHeader(http.StatusOK)
+		response := FavoriteGetReseponse{
+			Favorite: favorite[0],
+			Response: Response{
+				Status:  "Success",
+				Message: "Favorite get successfully",
+			},
+			UserName: user[0].UserName,
+			Age:      user[0].Age,
+		}
+		fmt.Println("response", response)
+		json, _ := json.Marshal(response)
+
+		w.Write(json)
+	} else if len(user) > 0 {
+		w.WriteHeader(http.StatusOK)
+		response := FavoriteGetReseponse{
+			Response: Response{
+				Status:  "Success",
+				Message: "Favorite get successfully",
+			},
+			UserName: user[0].UserName,
+			Age:      user[0].Age,
+		}
+		json, _ := json.Marshal(response)
+
+		w.Write(json)
+	}
 
 })
 
@@ -262,4 +348,20 @@ func responseAuthenticate(w http.ResponseWriter, statusCode int, token *auth.Tok
 
 	w.Write(json)
 	return nil
+}
+
+func decodeUserIdFromAccessToken(tokenString string) int {
+	claims := jwt.MapClaims{}
+	token, _ := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("SIGNINGKEY"), nil
+	})
+
+	fmt.Println(token)
+
+	c, ok := claims["user_id"].(float64)
+	var id int
+	if ok {
+		id = int(c)
+	}
+	return id
 }
