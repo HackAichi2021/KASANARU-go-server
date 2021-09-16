@@ -57,6 +57,7 @@ func main() {
 	r.Handle("/api/user/register", api_user.Register).Methods("POST")
 	r.Handle("/api/user/login", api_user.Login).Methods("POST")
 	r.Handle("/api/user/update", api_user.Update).Methods("POST")
+	r.Handle("/api/user/matching", api_user.Match).Methods("POST")
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},

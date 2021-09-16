@@ -37,6 +37,15 @@ type UpdateForm struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type MatchingForm struct {
+	Latitude     float64 `json:"latitude" binding:"required"`
+	Longitude    float64 `json:"longitude" binding:"required"`
+	Lend         int     `json:"lend" binding:"required"`
+	AfterArrival int     `json:"after_arrival" binding:"required"`
+	AccessToken  string  `json:"access_token" binding:"required"`
+	RefreshToken string  `json:"refresh_token" binding:"required"`
+}
+
 type Response struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
@@ -48,6 +57,8 @@ type AuthenticateResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
+
+var MatchLend []MatchingForm
 
 var Register = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var form database.User
@@ -187,6 +198,29 @@ var Update = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("uudisaj")
 
 	w.WriteHeader(http.StatusNoContent)
+
+})
+
+var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var form MatchingForm
+	fmt.Println("hello")
+	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		response := Response{
+			Status:  "Error",
+			Message: "Match failed",
+		}
+		json, _ := json.Marshal(response)
+
+		w.Write(json)
+		return
+	}
+
+	fmt.Println("form", form)
+	fmt.Println("match_lend", MatchLend)
+	MatchLend = append(MatchLend, form)
+	fmt.Println("match_lend", MatchLend)
 
 })
 
