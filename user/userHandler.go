@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"sync"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -53,7 +54,7 @@ type Token struct {
 type Matching struct {
 	UserId   int `json:"user_id" binding:"required"`
 	Info     MatchingForm
-	Favorite UpdateForm
+	Favorite database.Favorite
 }
 
 type Response struct {
@@ -75,6 +76,47 @@ type FavoriteGetReseponse struct {
 	Age      int    `json:"age" binding:"required"`
 }
 
+type AIFavoriteForm struct {
+	Age1      int `json:"age1" binding:"required"`
+	Sex1      int `json:"sex1" binding:"required"`
+	Game1     int `json:"game1" binding:"required"`
+	Sport1    int `json:"sport1" binding:"required"`
+	Book1     int `json:"book1" binding:"required"`
+	Travel1   int `json:"travel1" binding:"required"`
+	Internet1 int `json:"internet1" binding:"required"`
+	Anime1    int `json:"anime1" binding:"required"`
+	Movie1    int `json:"movie1" binding:"required"`
+	Music1    int `json:"music1" binding:"required"`
+	Gourmet1  int `json:"gourmet1" binding:"required"`
+	Mucle1    int `json:"mucle1" binding:"required"`
+	Camp1     int `json:"camp1" binding:"required"`
+	Tv1       int `json:"tv1" binding:"required"`
+	Cook1     int `json:"cook1" binding:"required"`
+	Age2      int `json:"age2" binding:"required"`
+	Sex2      int `json:"sex2" binding:"required"`
+	Game2     int `json:"game2" binding:"required"`
+	Sport2    int `json:"sport2" binding:"required"`
+	Book2     int `json:"book2" binding:"required"`
+	Travel2   int `json:"travel2" binding:"required"`
+	Internet2 int `json:"internet2" binding:"required"`
+	Anime2    int `json:"anime2" binding:"required"`
+	Movie2    int `json:"movie2" binding:"required"`
+	Music2    int `json:"music2" binding:"required"`
+	Gourmet2  int `json:"gourmet2" binding:"required"`
+	Mucle2    int `json:"mucle2" binding:"required"`
+	Camp2     int `json:"camp2" binding:"required"`
+	Tv2       int `json:"tv2" binding:"required"`
+	Cook2     int `json:"cook2" binding:"required"`
+}
+
+type AIDataForm struct {
+	Data []AIFavoriteForm `json:"data"`
+}
+
+type AIDataResult struct {
+	Result []int `json:"result"`
+}
+
 //貸す人へのresponse 借りる人には緯度、経度は0で渡す
 type LendResponse struct {
 	UserName  string  `json:"user_name" binding:"required"`
@@ -82,8 +124,13 @@ type LendResponse struct {
 	Longitude float64 `json:"longitude" binding:"required"`
 }
 
-var MatchingSlice [2][]Matching
-var NotifiesLend = make(map[string](chan LendResponse))
+type SafeLend struct {
+	MatchingSlice [2][]Matching
+	NotifiesLend  map[string](chan Matching)
+	Mux           sync.Mutex
+}
+
+var MatchingGlobal = new(SafeLend)
 
 var Register = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var form database.User
@@ -226,40 +273,55 @@ var Update = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 })
 
-// var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 	var form MatchingForm
-// 	fmt.Println("hello")
-// 	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
-// 		fmt.Println(err)
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		response := Response{
-// 			Status:  "Error",
-// 			Message: "Match failed",
-// 		}
-// 		json, _ := json.Marshal(response)
+var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var form MatchingForm
+	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		response := Response{
+			Status:  "Error",
+			Message: "Match failed",
+		}
+		json, _ := json.Marshal(response)
+		w.Write(json)
+		return
+	}
 
-// 		w.Write(json)
-// 		return
-// 	}
+	fmt.Println(form.AccessToken)
+	tmp := database.GetFavorite(decodeUserIdFromAccessToken(form.AccessToken))
+	fmt.Println("tuuka")
+	var item Matching
+	if len(tmp) > 0 {
+		item = Matching{
+			UserId:   decodeUserIdFromAccessToken(form.AccessToken),
+			Info:     form,
+			Favorite: tmp[0],
+		}
+	} else {
+		item = Matching{
+			UserId: decodeUserIdFromAccessToken(form.AccessToken),
+			Info:   form,
+		}
+	}
+	MatchingGlobal.Mux.Lock()
+	fmt.Println("rend", form.Lend)
+	MatchingGlobal.MatchingSlice[form.Lend] = append(MatchingGlobal.MatchingSlice[form.Lend], item)
+	MatchingGlobal.Mux.Unlock()
 
-// 	fmt.Println("form", form)
-// 	fmt.Println("match_lend", MatchingSlice)
-// 	item := Matching {
-// 		UserId: decodeUserIdFromAccessToken(form.AccessToken),
-// 		Info: form,
-// 		Favorite:
-// 	}
-// 	MatchingSlice[form.Lend] = append(MatchingSlice[form.Lend], form)
-// 	fmt.Println("match_lend", MatchingSlice)
+	MatchingGlobal.Mux.Lock()
+	MatchingGlobal.NotifiesLend[form.AccessToken] = make(chan Matching)
+	MatchingGlobal.Mux.Unlock()
 
-// 	NotifiesLend[form.AccessToken] = make(chan LendResponse)
-// 	fmt.Println("wait")
-// 	b := <-NotifiesLend[form.AccessToken]
-// 	fmt.Println("answer", b)
+	fmt.Println("wait")
+	b := <-MatchingGlobal.NotifiesLend[form.AccessToken]
+	fmt.Println("answer", b)
 
-// 	fmt.Println("id", decodeUserIdFromAccessToken(form.AccessToken))
+	fmt.Println("id", decodeUserIdFromAccessToken(form.AccessToken))
+	w.WriteHeader(http.StatusOK)
+	jsonStr, _ := json.Marshal(b)
+	w.Write(jsonStr)
 
-// })
+})
 
 var FavoriteGet = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var form UpdateForm
