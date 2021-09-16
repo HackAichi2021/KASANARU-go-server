@@ -100,6 +100,20 @@ func GetIdByEmail(email string) []User {
 	return item
 }
 
+func GetUserByUserId(id int) []User {
+	db_conn := GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+
+	item := []User{}
+	db_conn.Find(&item, "id=?", id)
+	fmt.Println("item", item)
+	return item
+}
+
 func GetOneColumnValueUser(column string, email string) []User {
 	db_conn := GormConnect()
 	db, err := db_conn.DB()
@@ -136,6 +150,22 @@ func InsertOrUpdateFavorite(item Favorite) error {
 		if result.Error != nil {
 			return result.Error
 		}
+	}
+	return nil
+}
+
+func GetFavorite(id int) []Favorite {
+	db_conn := GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+
+	var item []Favorite
+	db_conn.Find(&item, "user_id=?", id)
+	if len(item) == 1 {
+		return item
 	}
 	return nil
 }
