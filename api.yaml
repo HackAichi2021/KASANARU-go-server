@@ -268,7 +268,7 @@ components:
         gourmet:
           type: integer
           example: 0  
-        mucle:
+        muscle:
           type: integer
           example: 0  
         camp:
