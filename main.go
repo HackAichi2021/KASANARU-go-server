@@ -4,11 +4,13 @@ import (
 	"bytes"
 	renameJson "encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
 	"os"
-	"os/exec"
+	"regexp"
+	"strconv"
 	"time"
 
 	"hackaichi2021/database"
@@ -41,7 +43,6 @@ func main() {
 	r.Handle("/api/user/update", api_user.Update).Methods("POST")
 	r.Handle("/api/user/matching", api_user.Match).Methods("POST")
 	r.Handle("/api/user/favorite/get", api_user.FavoriteGet).Methods("POST")
-	r.Handle("/curl", a).Methods("GET")
 	go monitor()
 
 	c := cors.New(cors.Options{
@@ -67,85 +68,74 @@ func logHandler(h http.Handler) http.Handler {
 	})
 }
 
-var a = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	out, _ := exec.Command("curl", "google.com").Output()
-	fmt.Println(string(out))
-})
-
-type AIRequest struct {
-}
-
 func monitor() {
-	// a := api_user.LendResponse{
-	// 	UserName:  "test",
-	// 	Latitude:  134.31,
-	// 	Longitude: 24.13,
-	// }
 	for {
-		time.Sleep(1 * time.Second) // 1秒待つ
-		// maxValue := 0
-		// maxIndex := 0
-		// fmt.Println(api_user.MatchingGlobal, "test")
+		time.Sleep(15 * time.Second) // 1秒待つ
 		if len(api_user.MatchingGlobal.MatchingSlice[0]) > 0 {
 			fmt.Println("ok")
 			api_user.MatchingGlobal.Mux.Lock()
-			for _, v := range api_user.MatchingGlobal.MatchingSlice[1] {
+			var maxValue float64
+			var maxIndex int
+			var match api_user.Matching
+			for i, v := range api_user.MatchingGlobal.MatchingSlice[1] {
 				fmt.Println("inside")
-				// tmp := []api_user.AIFavoriteForm{
-				// 	{
-				// 		Age1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Age,
-				// 		Sex1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sex,
-				// 		Game1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Game,
-				// 		Sport1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sport,
-				// 		Book1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Book,
-				// 		Travel1:   api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Travel,
-				// 		Internet1: api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Internet,
-				// 		Anime1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Anime,
-				// 		Movie1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Movie,
-				// 		Music1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Music,
-				// 		Gourmet1:  api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Gourmet,
-				// 		Mucle1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Muscle,
-				// 		Camp1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Camp,
-				// 		Tv1:       api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Tv,
-				// 		Cook1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Cook,
-				// 		Age2:      v.Favorite.Age,
-				// 		Sex2:      v.Favorite.Sex,
-				// 		Game2:     v.Favorite.Game,
-				// 		Sport2:    v.Favorite.Sport,
-				// 		Book2:     v.Favorite.Book,
-				// 		Travel2:   v.Favorite.Travel,
-				// 		Internet2: v.Favorite.Internet,
-				// 		Anime2:    v.Favorite.Anime,
-				// 		Movie2:    v.Favorite.Movie,
-				// 		Music2:    v.Favorite.Music,
-				// 		Gourmet2:  v.Favorite.Gourmet,
-				// 		Mucle2:    v.Favorite.Muscle,
-				// 		Camp2:     v.Favorite.Camp,
-				// 		Tv2:       v.Favorite.Tv,
-				// 		Cook2:     v.Favorite.Cook,
-				// 	},
-				// }
-				// item := api_user.AIDataForm{
-				// 	Data: tmp,
-				// }
-				// _, err := HttpPost(os.Getenv("URL"), os.Getenv("AUTHENTICATION"), item)
-				// if err != nil {
-				// fmt.Println("err", err)
-				// }
-				// apiValue := 100
-				// if maxValue < apiValue {
-				// maxValue = apiValue
-				// maxIndex = i
-				api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][0].Info.AccessToken] <- v
-				delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][0].Info.AccessToken)
-
-				api_user.MatchingGlobal.NotifiesLend[v.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][0]
-				delete(api_user.MatchingGlobal.NotifiesLend, v.Info.AccessToken)
-
-				api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
-				api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], 0)
+				tmp := []api_user.AIFavoriteForm{
+					{
+						Age1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Age,
+						Sex1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sex,
+						Game1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Game,
+						Sport1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sport,
+						Book1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Book,
+						Travel1:   api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Travel,
+						Internet1: api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Internet,
+						Anime1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Anime,
+						Movie1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Movie,
+						Music1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Music,
+						Gourmet1:  api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Gourmet,
+						Mucle1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Muscle,
+						Camp1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Camp,
+						Tv1:       api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Tv,
+						Cook1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Cook,
+						Age2:      v.Favorite.Age,
+						Sex2:      v.Favorite.Sex,
+						Game2:     v.Favorite.Game,
+						Sport2:    v.Favorite.Sport,
+						Book2:     v.Favorite.Book,
+						Travel2:   v.Favorite.Travel,
+						Internet2: v.Favorite.Internet,
+						Anime2:    v.Favorite.Anime,
+						Movie2:    v.Favorite.Movie,
+						Music2:    v.Favorite.Music,
+						Gourmet2:  v.Favorite.Gourmet,
+						Mucle2:    v.Favorite.Muscle,
+						Camp2:     v.Favorite.Camp,
+						Tv2:       v.Favorite.Tv,
+						Cook2:     v.Favorite.Cook,
+					},
+				}
+				item := api_user.AIDataForm{
+					Data: tmp,
+				}
+				f, err := HttpPost(os.Getenv("URL"), os.Getenv("AUTHENTICATION"), item)
+				if err != nil {
+					fmt.Println("err", err)
+				}
+				if maxValue < f {
+					maxValue = f
+					match = v
+					maxIndex = i
+				}
 				break
 			}
+
+			api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken] <- match
+			delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken)
+
+			api_user.MatchingGlobal.NotifiesLend[match.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][maxIndex]
+			delete(api_user.MatchingGlobal.NotifiesLend, match.Info.AccessToken)
+
+			api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
+			api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], 0)
 			api_user.MatchingGlobal.Mux.Unlock()
 		}
 	}
@@ -183,8 +173,7 @@ func Power2(x float64) float64 {
 	return math.Pow(x, 2)
 }
 
-func HttpPost(url string, token string, json api_user.AIDataForm) (int, error) {
-	// url = "http://localhost:8000"
+func HttpPost(url string, token string, json api_user.AIDataForm) (float64, error) {
 	fmt.Println("url", url, "token", token)
 	s, err := renameJson.Marshal(json)
 	if err != nil {
@@ -215,12 +204,14 @@ func HttpPost(url string, token string, json api_user.AIDataForm) (int, error) {
 
 	var result []api_user.AIDataResult
 	fmt.Println("Body", resp.Body)
-	if err := renameJson.NewDecoder(resp.Body).Decode(&result); err != nil {
-		fmt.Println(err)
 
-		return 0, nil
-	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	r := regexp.MustCompile(`\d+\.\d+`)
+	u := r.FindAllStringSubmatch(string(body), 1)
+	fmt.Println("u", u[0][0])
+	a, _ := strconv.ParseFloat(u[0][0], 64)
+
 	fmt.Println("result", result)
-	return 0, nil
-	// return result[0], nil
+	return a, nil
 }
