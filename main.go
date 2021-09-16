@@ -8,6 +8,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"os/exec"
 	"time"
 
 	"hackaichi2021/database"
@@ -40,6 +41,7 @@ func main() {
 	r.Handle("/api/user/update", api_user.Update).Methods("POST")
 	r.Handle("/api/user/matching", api_user.Match).Methods("POST")
 	r.Handle("/api/user/favorite/get", api_user.FavoriteGet).Methods("POST")
+	r.Handle("/curl", api_user.FavoriteGet).Methods("GET")
 	go monitor()
 
 	c := cors.New(cors.Options{
@@ -64,6 +66,11 @@ func logHandler(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 }
+
+var a = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	out, _ := exec.Command("curl", "google.com").Output()
+	fmt.Println(out)
+})
 
 type AIRequest struct {
 }
