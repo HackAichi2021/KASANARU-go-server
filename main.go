@@ -45,14 +45,15 @@ func main() {
 	r.Handle("/api/user/favorite/get", api_user.FavoriteGet).Methods("POST")
 	go monitor()
 
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"*"},
-		AllowCredentials: true,
-		AllowedHeaders:   []string{"Content-Type", "application/json"},
-		// Enable Debugging for testing, consider disabling in production
-		Debug: true,
-	})
+	// c := cors.New(cors.Options{
+	// 	AllowedOrigins:   []string{"*"},
+	// 	AllowedMethods:   []string{"*"},
+	// 	AllowCredentials: true,
+	// 	AllowedHeaders:   []string{"Content-Type", "application/json"},
+	// 	// Enable Debugging for testing, consider disabling in production
+	// 	Debug: true,
+	// })
+	c := cors.Default()
 	chain := alice.New(c.Handler, logHandler).Then(r)
 
 	//サーバー起動
@@ -70,7 +71,7 @@ func logHandler(h http.Handler) http.Handler {
 
 func monitor() {
 	for {
-		time.Sleep(15 * time.Second) // 1秒待つ
+		time.Sleep(3 * time.Second) // 3秒待つ
 		if len(api_user.MatchingGlobal.MatchingSlice[0]) > 0 {
 			fmt.Println("ok")
 			api_user.MatchingGlobal.Mux.Lock()
@@ -125,7 +126,6 @@ func monitor() {
 					match = v
 					maxIndex = i
 				}
-				break
 			}
 
 			api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken] <- match
