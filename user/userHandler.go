@@ -74,6 +74,7 @@ type FavoriteGetReseponse struct {
 	Response Response
 	UserName string `json:"username"`
 	Age      int    `json:"age" binding:"required"`
+	Email    string `json:"email"`
 }
 
 type AIFavoriteForm struct {
@@ -135,6 +136,7 @@ var MatchingGlobal = new(SafeLend)
 var Register = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var form database.User
 	json.NewDecoder(r.Body).Decode(&form)
+	fmt.Println(form)
 	statusCode := database.CreateUser(form)
 	w.WriteHeader(statusCode)
 	if statusCode != http.StatusCreated {
@@ -287,7 +289,7 @@ var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(form.AccessToken)
+	fmt.Println("access", form.AccessToken)
 	tmp := database.GetFavorite(decodeUserIdFromAccessToken(form.AccessToken))
 	fmt.Println("tuuka")
 	var item Matching
@@ -350,6 +352,7 @@ var FavoriteGet = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 			},
 			UserName: user[0].UserName,
 			Age:      user[0].Age,
+			Email:    user[0].Email,
 		}
 		fmt.Println("response", response)
 		json, _ := json.Marshal(response)
@@ -364,6 +367,7 @@ var FavoriteGet = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 			},
 			UserName: user[0].UserName,
 			Age:      user[0].Age,
+			Email:    user[0].Email,
 		}
 		json, _ := json.Marshal(response)
 
