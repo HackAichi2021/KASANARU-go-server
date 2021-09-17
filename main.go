@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"time"
 
 	"hackaichi2021/database"
 	"hackaichi2021/user"
@@ -62,7 +63,7 @@ func logHandler(h http.Handler) http.Handler {
 
 func monitor() {
 	for {
-		// time.Sleep(3 * time.Second) // 3秒待つ
+		time.Sleep(5 * time.Second) // 3秒待つ
 		if len(api_user.MatchingGlobal.MatchingSlice[0]) > 0 {
 			fmt.Println("ok")
 			fmt.Println("len", len(api_user.MatchingGlobal.MatchingSlice[0]), len(api_user.MatchingGlobal.MatchingSlice[1]))
