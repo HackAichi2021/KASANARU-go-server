@@ -11,7 +11,6 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"time"
 
 	"hackaichi2021/database"
 	"hackaichi2021/user"
@@ -45,14 +44,6 @@ func main() {
 	r.Handle("/api/user/favorite/get", api_user.FavoriteGet).Methods("POST")
 	go monitor()
 
-	// c := cors.New(cors.Options{
-	// 	AllowedOrigins:   []string{"*"},
-	// 	AllowedMethods:   []string{"*"},
-	// 	AllowCredentials: true,
-	// 	AllowedHeaders:   []string{"Content-Type", "application/json"},
-	// 	// Enable Debugging for testing, consider disabling in production
-	// 	Debug: true,
-	// })
 	c := cors.Default()
 	chain := alice.New(c.Handler, logHandler).Then(r)
 
@@ -71,12 +62,13 @@ func logHandler(h http.Handler) http.Handler {
 
 func monitor() {
 	for {
-		time.Sleep(3 * time.Second) // 3秒待つ
+		// time.Sleep(3 * time.Second) // 3秒待つ
 		if len(api_user.MatchingGlobal.MatchingSlice[0]) > 0 {
 			fmt.Println("ok")
+			fmt.Println("len", len(api_user.MatchingGlobal.MatchingSlice[0]), len(api_user.MatchingGlobal.MatchingSlice[1]))
 			api_user.MatchingGlobal.Mux.Lock()
 			var maxValue float64
-			var maxIndex int
+			var maxIndex int = -1
 			var match api_user.Matching
 			for i, v := range api_user.MatchingGlobal.MatchingSlice[1] {
 				fmt.Println("inside")
@@ -118,6 +110,7 @@ func monitor() {
 					Data: tmp,
 				}
 				f, err := HttpPost(os.Getenv("URL"), os.Getenv("AUTHENTICATION"), item)
+				fmt.Println("f", f)
 				if err != nil {
 					fmt.Println("err", err)
 				}
@@ -128,15 +121,18 @@ func monitor() {
 				}
 			}
 
-			api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken] <- match
-			delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken)
+			if maxIndex != -1 {
+				api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken] <- match
+				delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken)
 
-			api_user.MatchingGlobal.NotifiesLend[match.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][maxIndex]
-			delete(api_user.MatchingGlobal.NotifiesLend, match.Info.AccessToken)
+				api_user.MatchingGlobal.NotifiesLend[match.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][maxIndex]
+				delete(api_user.MatchingGlobal.NotifiesLend, match.Info.AccessToken)
 
-			api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
-			api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], 0)
+				api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
+				api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], 0)
+			}
 			api_user.MatchingGlobal.Mux.Unlock()
+
 		}
 	}
 	// fmt.Println("slice", api_user.MatchingSlice)
