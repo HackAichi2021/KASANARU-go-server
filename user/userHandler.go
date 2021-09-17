@@ -308,9 +308,6 @@ var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	MatchingGlobal.Mux.Lock()
 	fmt.Println("rend", form.Lend)
 	MatchingGlobal.MatchingSlice[form.Lend] = append(MatchingGlobal.MatchingSlice[form.Lend], item)
-	MatchingGlobal.Mux.Unlock()
-
-	MatchingGlobal.Mux.Lock()
 	MatchingGlobal.NotifiesLend[form.AccessToken] = make(chan Matching)
 	MatchingGlobal.Mux.Unlock()
 
