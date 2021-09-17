@@ -129,7 +129,7 @@ func monitor() {
 				delete(api_user.MatchingGlobal.NotifiesLend, match.Info.AccessToken)
 
 				api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
-				api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], 0)
+				api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], maxIndex)
 			}
 			api_user.MatchingGlobal.Mux.Unlock()
 
