@@ -123,10 +123,12 @@ func monitor() {
 				}
 
 				if maxIndex != -1 {
-					api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken] <- match
-					delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken)
+					fmt.Println("貸す側への返答", match)
+					api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][0].Info.AccessToken] <- match
+					delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][0].Info.AccessToken)
 
-					api_user.MatchingGlobal.NotifiesLend[match.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][maxIndex]
+					fmt.Println("借りる側への返答", api_user.MatchingGlobal.MatchingSlice[0][0])
+					api_user.MatchingGlobal.NotifiesLend[match.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][0]
 					delete(api_user.MatchingGlobal.NotifiesLend, match.Info.AccessToken)
 
 					api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
