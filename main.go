@@ -45,7 +45,8 @@ func main() {
 	go monitor()
 
 	c := cors.Default()
-	chain := alice.New(c.Handler, logHandler).Then(r)
+	muxWithMiddlewares := http.TimeoutHandler(r, time.Second*20, "Timeout!")
+	chain := alice.New(c.Handler, logHandler).Then(muxWithMiddlewares)
 
 	//サーバー起動
 	if err := http.ListenAndServe(":"+os.Getenv("PORT"), chain); err != nil {
@@ -62,7 +63,7 @@ func logHandler(h http.Handler) http.Handler {
 
 func monitor() {
 	for {
-		time.Sleep(5 * time.Second) // 3秒待つ
+		time.Sleep(3 * time.Second) // 3秒待つ
 		if len(api_user.MatchingGlobal.MatchingSlice[0]) > 0 {
 			fmt.Println("ok")
 			fmt.Println("len", len(api_user.MatchingGlobal.MatchingSlice[0]), len(api_user.MatchingGlobal.MatchingSlice[1]))
