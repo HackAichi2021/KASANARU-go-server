@@ -25,7 +25,7 @@ type User struct {
 
 type Favorite struct {
 	UserId   int `json:"id" gorm:"unique;not null"`
-	Age      int `json:"username" binding:"required"`
+	Age      int `json:"age" binding:"required"`
 	Sex      int `json:"sex" binding:"required"`
 	Game     int `json:"game" binding:"required"`
 	Sport    int `json:"sport" binding:"required"`
