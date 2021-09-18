@@ -72,56 +72,56 @@ func monitor() {
 			var match api_user.Matching
 			for i, v := range api_user.MatchingGlobal.MatchingSlice[1] {
 				fmt.Println("inside")
-				if distance(api_user.MatchingGlobal.MatchingSlice[0][0].Info.Latitude,
-					api_user.MatchingGlobal.MatchingSlice[0][0].Info.Longitude, v.Info.Latitude, v.Info.Longitude, "M") < DISTANCE_FROM_USERS {
-					tmp := []api_user.AIFavoriteForm{
-						{
-							Age1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Age,
-							Sex1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sex,
-							Game1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Game,
-							Sport1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sport,
-							Book1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Book,
-							Travel1:   api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Travel,
-							Internet1: api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Internet,
-							Anime1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Anime,
-							Movie1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Movie,
-							Music1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Music,
-							Gourmet1:  api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Gourmet,
-							Mucle1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Muscle,
-							Camp1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Camp,
-							Tv1:       api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Tv,
-							Cook1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Cook,
-							Age2:      v.Favorite.Age,
-							Sex2:      v.Favorite.Sex,
-							Game2:     v.Favorite.Game,
-							Sport2:    v.Favorite.Sport,
-							Book2:     v.Favorite.Book,
-							Travel2:   v.Favorite.Travel,
-							Internet2: v.Favorite.Internet,
-							Anime2:    v.Favorite.Anime,
-							Movie2:    v.Favorite.Movie,
-							Music2:    v.Favorite.Music,
-							Gourmet2:  v.Favorite.Gourmet,
-							Mucle2:    v.Favorite.Muscle,
-							Camp2:     v.Favorite.Camp,
-							Tv2:       v.Favorite.Tv,
-							Cook2:     v.Favorite.Cook,
-						},
-					}
-					item := api_user.AIDataForm{
-						Data: tmp,
-					}
-					f, err := HttpPost(os.Getenv("URL"), os.Getenv("AUTHENTICATION"), item)
-					fmt.Println("f", f)
-					if err != nil {
-						fmt.Println("err", err)
-					}
-					if maxValue < f {
-						maxValue = f
-						match = v
-						maxIndex = i
-					}
+				// if distance(api_user.MatchingGlobal.MatchingSlice[0][0].Info.Latitude,
+				// api_user.MatchingGlobal.MatchingSlice[0][0].Info.Longitude, v.Info.Latitude, v.Info.Longitude, "M") < DISTANCE_FROM_USERS {
+				tmp := []api_user.AIFavoriteForm{
+					{
+						Age1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Age,
+						Sex1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sex,
+						Game1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Game,
+						Sport1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sport,
+						Book1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Book,
+						Travel1:   api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Travel,
+						Internet1: api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Internet,
+						Anime1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Anime,
+						Movie1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Movie,
+						Music1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Music,
+						Gourmet1:  api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Gourmet,
+						Mucle1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Muscle,
+						Camp1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Camp,
+						Tv1:       api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Tv,
+						Cook1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Cook,
+						Age2:      v.Favorite.Age,
+						Sex2:      v.Favorite.Sex,
+						Game2:     v.Favorite.Game,
+						Sport2:    v.Favorite.Sport,
+						Book2:     v.Favorite.Book,
+						Travel2:   v.Favorite.Travel,
+						Internet2: v.Favorite.Internet,
+						Anime2:    v.Favorite.Anime,
+						Movie2:    v.Favorite.Movie,
+						Music2:    v.Favorite.Music,
+						Gourmet2:  v.Favorite.Gourmet,
+						Mucle2:    v.Favorite.Muscle,
+						Camp2:     v.Favorite.Camp,
+						Tv2:       v.Favorite.Tv,
+						Cook2:     v.Favorite.Cook,
+					},
 				}
+				item := api_user.AIDataForm{
+					Data: tmp,
+				}
+				f, err := HttpPost(os.Getenv("URL"), os.Getenv("AUTHENTICATION"), item)
+				fmt.Println("f", f)
+				if err != nil {
+					fmt.Println("err", err)
+				}
+				if maxValue < f {
+					maxValue = f
+					match = v
+					maxIndex = i
+				}
+				// }
 
 				if maxIndex != -1 {
 					fmt.Println("貸す側への返答", match)
