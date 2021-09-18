@@ -134,6 +134,12 @@ func monitor() {
 
 					api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
 					api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], maxIndex)
+				} else {
+					if len(api_user.MatchingGlobal.MatchingSlice[0]) >= 2 {
+						tmp := api_user.MatchingGlobal.MatchingSlice[0][0]
+						api_user.MatchingGlobal.MatchingSlice[0] = api_user.MatchingGlobal.MatchingSlice[0][1:]
+						api_user.MatchingGlobal.MatchingSlice[0] = append(api_user.MatchingGlobal.MatchingSlice[0][1:], tmp)
+					}
 				}
 			}
 
