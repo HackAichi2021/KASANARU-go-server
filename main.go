@@ -23,9 +23,7 @@ import (
 )
 
 const (
-	EQUATORIAL_RADIUS = 6378137.0            // 赤道半径 GRS80
-	POLAR_RADIUS      = 6356752.314          // 極半径 GRS80
-	ECCENTRICITY      = 0.081819191042815790 // 第一離心率 GRS80
+	DISTANCE_FROM_USERS = 150 // マッチング相手との距離
 )
 
 type Coodinate struct {
@@ -73,65 +71,69 @@ func monitor() {
 			var match api_user.Matching
 			for i, v := range api_user.MatchingGlobal.MatchingSlice[1] {
 				fmt.Println("inside")
-				tmp := []api_user.AIFavoriteForm{
-					{
-						Age1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Age,
-						Sex1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sex,
-						Game1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Game,
-						Sport1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sport,
-						Book1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Book,
-						Travel1:   api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Travel,
-						Internet1: api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Internet,
-						Anime1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Anime,
-						Movie1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Movie,
-						Music1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Music,
-						Gourmet1:  api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Gourmet,
-						Mucle1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Muscle,
-						Camp1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Camp,
-						Tv1:       api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Tv,
-						Cook1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Cook,
-						Age2:      v.Favorite.Age,
-						Sex2:      v.Favorite.Sex,
-						Game2:     v.Favorite.Game,
-						Sport2:    v.Favorite.Sport,
-						Book2:     v.Favorite.Book,
-						Travel2:   v.Favorite.Travel,
-						Internet2: v.Favorite.Internet,
-						Anime2:    v.Favorite.Anime,
-						Movie2:    v.Favorite.Movie,
-						Music2:    v.Favorite.Music,
-						Gourmet2:  v.Favorite.Gourmet,
-						Mucle2:    v.Favorite.Muscle,
-						Camp2:     v.Favorite.Camp,
-						Tv2:       v.Favorite.Tv,
-						Cook2:     v.Favorite.Cook,
-					},
+				if distance(api_user.MatchingGlobal.MatchingSlice[0][0].Info.Latitude,
+					api_user.MatchingGlobal.MatchingSlice[0][0].Info.Longitude, v.Info.Latitude, v.Info.Longitude, "M") < DISTANCE_FROM_USERS {
+					tmp := []api_user.AIFavoriteForm{
+						{
+							Age1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Age,
+							Sex1:      api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sex,
+							Game1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Game,
+							Sport1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Sport,
+							Book1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Book,
+							Travel1:   api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Travel,
+							Internet1: api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Internet,
+							Anime1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Anime,
+							Movie1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Movie,
+							Music1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Music,
+							Gourmet1:  api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Gourmet,
+							Mucle1:    api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Muscle,
+							Camp1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Camp,
+							Tv1:       api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Tv,
+							Cook1:     api_user.MatchingGlobal.MatchingSlice[0][0].Favorite.Cook,
+							Age2:      v.Favorite.Age,
+							Sex2:      v.Favorite.Sex,
+							Game2:     v.Favorite.Game,
+							Sport2:    v.Favorite.Sport,
+							Book2:     v.Favorite.Book,
+							Travel2:   v.Favorite.Travel,
+							Internet2: v.Favorite.Internet,
+							Anime2:    v.Favorite.Anime,
+							Movie2:    v.Favorite.Movie,
+							Music2:    v.Favorite.Music,
+							Gourmet2:  v.Favorite.Gourmet,
+							Mucle2:    v.Favorite.Muscle,
+							Camp2:     v.Favorite.Camp,
+							Tv2:       v.Favorite.Tv,
+							Cook2:     v.Favorite.Cook,
+						},
+					}
+					item := api_user.AIDataForm{
+						Data: tmp,
+					}
+					f, err := HttpPost(os.Getenv("URL"), os.Getenv("AUTHENTICATION"), item)
+					fmt.Println("f", f)
+					if err != nil {
+						fmt.Println("err", err)
+					}
+					if maxValue < f {
+						maxValue = f
+						match = v
+						maxIndex = i
+					}
 				}
-				item := api_user.AIDataForm{
-					Data: tmp,
-				}
-				f, err := HttpPost(os.Getenv("URL"), os.Getenv("AUTHENTICATION"), item)
-				fmt.Println("f", f)
-				if err != nil {
-					fmt.Println("err", err)
-				}
-				if maxValue < f {
-					maxValue = f
-					match = v
-					maxIndex = i
+
+				if maxIndex != -1 {
+					api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken] <- match
+					delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken)
+
+					api_user.MatchingGlobal.NotifiesLend[match.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][maxIndex]
+					delete(api_user.MatchingGlobal.NotifiesLend, match.Info.AccessToken)
+
+					api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
+					api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], maxIndex)
 				}
 			}
 
-			if maxIndex != -1 {
-				api_user.MatchingGlobal.NotifiesLend[api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken] <- match
-				delete(api_user.MatchingGlobal.NotifiesLend, api_user.MatchingGlobal.MatchingSlice[0][maxIndex].Info.AccessToken)
-
-				api_user.MatchingGlobal.NotifiesLend[match.Info.AccessToken] <- api_user.MatchingGlobal.MatchingSlice[0][maxIndex]
-				delete(api_user.MatchingGlobal.NotifiesLend, match.Info.AccessToken)
-
-				api_user.MatchingGlobal.MatchingSlice[0] = unset(api_user.MatchingGlobal.MatchingSlice[0], 0)
-				api_user.MatchingGlobal.MatchingSlice[1] = unset(api_user.MatchingGlobal.MatchingSlice[1], maxIndex)
-			}
 			api_user.MatchingGlobal.Mux.Unlock()
 
 		}
@@ -146,28 +148,37 @@ func unset(s []api_user.Matching, i int) []api_user.Matching {
 	return append(s[:i], s[i+1:]...)
 }
 
-func hubenyDistance(src Coodinate, dst Coodinate) float64 {
-	dx := degree2radian(dst.Longitude - src.Longitude)
-	dy := degree2radian(dst.Latitude - src.Latitude)
-	my := degree2radian((src.Latitude + dst.Latitude) / 2)
+func distance(lat1 float64, lng1 float64, lat2 float64, lng2 float64, unit ...string) float64 {
+	const PI float64 = 3.141592653589793
 
-	W := math.Sqrt(1 - (Power2(ECCENTRICITY) * Power2(math.Sin(my)))) // 卯酉線曲率半径の分母
-	m_numer := EQUATORIAL_RADIUS * (1 - Power2(ECCENTRICITY))         // 子午線曲率半径の分子
+	radlat1 := float64(PI * lat1 / 180)
+	radlat2 := float64(PI * lat2 / 180)
 
-	M := m_numer / math.Pow(W, 3) // 子午線曲率半径
-	N := EQUATORIAL_RADIUS / W    // 卯酉線曲率半径
+	theta := float64(lng1 - lng2)
+	radtheta := float64(PI * theta / 180)
 
-	d := math.Sqrt(Power2(dy*M) + Power2(dx*N*math.Cos(my)))
+	dist := math.Sin(radlat1)*math.Sin(radlat2) + math.Cos(radlat1)*math.Cos(radlat2)*math.Cos(radtheta)
 
-	return d
-}
+	if dist > 1 {
+		dist = 1
+	}
 
-func degree2radian(x float64) float64 {
-	return x * math.Pi / 180
-}
+	dist = math.Acos(dist)
+	dist = dist * 180 / PI
+	dist = dist * 60 * 1.1515
 
-func Power2(x float64) float64 {
-	return math.Pow(x, 2)
+	if len(unit) > 0 {
+		if unit[0] == "K" {
+			dist = dist * 1.609344
+		} else if unit[0] == "N" {
+			dist = dist * 0.8684
+		} else if unit[0] == "M" {
+			dist = dist * 1.609344
+			dist /= 1000
+		}
+	}
+
+	return dist
 }
 
 func HttpPost(url string, token string, json api_user.AIDataForm) (float64, error) {

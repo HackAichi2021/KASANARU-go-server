@@ -55,6 +55,8 @@ type Matching struct {
 	UserId   int `json:"user_id" binding:"required"`
 	Info     MatchingForm
 	Favorite database.Favorite
+	Email    string `json:"email" binding:"required"`
+	UserName string `json:"username" binding:"required"`
 }
 
 type Response struct {
@@ -291,18 +293,29 @@ var Match = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("access", form.AccessToken)
 	tmp := database.GetFavorite(decodeUserIdFromAccessToken(form.AccessToken))
+	tmpUser := database.GetUserByUserId(decodeUserIdFromAccessToken(form.AccessToken))
 	fmt.Println("tuuka")
 	var item Matching
-	if len(tmp) > 0 {
+	if len(tmp) > 0 && len(tmpUser) > 0 {
+		item = Matching{
+			UserId:   decodeUserIdFromAccessToken(form.AccessToken),
+			Info:     form,
+			Favorite: tmp[0],
+			Email:    tmpUser[0].Email,
+			UserName: tmpUser[0].UserName,
+		}
+	} else if len(tmp) > 0 {
 		item = Matching{
 			UserId:   decodeUserIdFromAccessToken(form.AccessToken),
 			Info:     form,
 			Favorite: tmp[0],
 		}
-	} else {
+	} else if len(tmpUser) > 0 {
 		item = Matching{
-			UserId: decodeUserIdFromAccessToken(form.AccessToken),
-			Info:   form,
+			UserId:   decodeUserIdFromAccessToken(form.AccessToken),
+			Info:     form,
+			Email:    tmpUser[0].Email,
+			UserName: tmpUser[0].UserName,
 		}
 	}
 	MatchingGlobal.Mux.Lock()
