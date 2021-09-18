@@ -67,6 +67,7 @@ type Response struct {
 type AuthenticateResponse struct {
 	Status       string `json:"status"`
 	Message      string `json:"message"`
+	UserName     string `json:"username"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
@@ -203,6 +204,7 @@ var Login = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		Message:      "Login successfully",
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
+		UserName:     user[0].UserName,
 	}
 	json, _ := json.Marshal(response)
 
