@@ -23,6 +23,11 @@ type User struct {
 	DeletedAt int64  `json:"deletedAt"`
 }
 
+type Feedback struct {
+	Categories string `json:"categories"`
+	Star       int64  `json:"star"`
+}
+
 type Favorite struct {
 	UserId   int `json:"id" gorm:"unique;not null"`
 	Age      int `json:"age" binding:"required"`
@@ -166,6 +171,20 @@ func GetFavorite(id int) []Favorite {
 	db_conn.Find(&item, "user_id=?", id)
 	if len(item) == 1 {
 		return item
+	}
+	return nil
+}
+
+func InsertFeedback(item Feedback) error {
+	db_conn := GormConnect()
+	db, err := db_conn.DB()
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+
+	if result := db_conn.Table("feedbacks").Create(&item); result.Error != nil {
+		return result.Error
 	}
 	return nil
 }
