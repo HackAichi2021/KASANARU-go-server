@@ -1,0 +1,7 @@
+BEGIN;
+CREATE TABLE IF NOT EXISTS feedbacks(
+   id serial PRIMARY KEY,
+   star INTEGER DEFAULT 0 NOT NULL,
+   categories VARCHAR (255) NOT NULL
+);
+COMMIT;

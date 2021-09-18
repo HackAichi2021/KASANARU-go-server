@@ -133,6 +133,11 @@ type SafeLend struct {
 	Mux           sync.Mutex
 }
 
+type FeedbackForm struct {
+	Categories string `json:"categories"`
+	Star       int64  `json:"star"`
+}
+
 var MatchingGlobal = new(SafeLend)
 
 var Register = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -383,6 +388,42 @@ var FavoriteGet = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 
 		w.Write(json)
 	}
+
+})
+
+var FeedbackPost = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var form FeedbackForm
+	if err := json.NewDecoder(r.Body).Decode(&form); err != nil {
+		fmt.Println("error", err)
+		w.WriteHeader(http.StatusBadRequest)
+		response := Response{
+			Status:  "Error",
+			Message: "Uncorrect request",
+		}
+		json, _ := json.Marshal(response)
+		w.Write(json)
+		return
+	}
+	insert := database.Feedback{
+		Categories: form.Categories,
+		Star:       form.Star,
+	}
+	fmt.Println("form", form)
+	fmt.Println("insert", insert)
+	fmt.Println("form", insert.Categories)
+
+	if err := database.InsertFeedback(insert); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response := Response{
+			Status:  "Error",
+			Message: "Uncorrect request",
+		}
+		json, _ := json.Marshal(response)
+		w.Write(json)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 
 })
 
